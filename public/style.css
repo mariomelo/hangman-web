@@ -1,0 +1,201 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.container {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 600px;
+    width: 100%;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 2.5rem;
+}
+
+.version {
+    text-align: center;
+    color: #666;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+}
+
+.game-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.lives {
+    font-weight: bold;
+    color: #667eea;
+    font-size: 1.1rem;
+}
+
+.message {
+    color: #333;
+    font-size: 1rem;
+    text-align: right;
+}
+
+.word-display {
+    text-align: center;
+    font-size: 2.5rem;
+    letter-spacing: 10px;
+    margin: 30px 0;
+    font-family: 'Courier New', monospace;
+    color: #333;
+    font-weight: bold;
+}
+
+.guesses {
+    text-align: center;
+    margin: 20px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+#guessed-letters {
+    color: #667eea;
+    font-weight: bold;
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+}
+
+.input-section {
+    display: flex;
+    gap: 10px;
+    margin: 30px 0;
+}
+
+#letter-input {
+    flex: 1;
+    padding: 15px;
+    font-size: 1.2rem;
+    border: 2px solid #667eea;
+    border-radius: 10px;
+    text-align: center;
+    text-transform: uppercase;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+#letter-input:focus {
+    border-color: #764ba2;
+}
+
+#letter-input:disabled {
+    background: #e9ecef;
+    cursor: not-allowed;
+}
+
+button {
+    padding: 15px 30px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.2s, background-color 0.3s;
+}
+
+button:hover:not(:disabled) {
+    transform: translateY(-2px);
+}
+
+button:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#guess-button {
+    background: #667eea;
+    color: white;
+}
+
+#guess-button:hover:not(:disabled) {
+    background: #5568d3;
+}
+
+.controls {
+    text-align: center;
+}
+
+#new-game-button {
+    background: #28a745;
+    color: white;
+    padding: 15px 40px;
+}
+
+#new-game-button:hover {
+    background: #218838;
+}
+
+.reload-notification {
+    display: none;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #28a745;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    animation: slideIn 0.3s ease-out;
+}
+
+.reload-notification.show {
+    display: block;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.message.win {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.message.lose {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.input-section.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}

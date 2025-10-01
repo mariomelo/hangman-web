@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Forca</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Jogo da Forca</h1>
+
+        <div class="version">
+            Engine Version: <span id="version">Loading...</span>
+        </div>
+
+        <div class="game-info">
+            <div class="lives">
+                Tentativas Restantes: <span id="lives">6</span>
+            </div>
+            <div class="message" id="message">Clique em "Novo Jogo" para começar</div>
+        </div>
+
+        <div class="word-display" id="word-display">_ _ _ _ _ _ _ _ _ _ _</div>
+
+        <div class="guesses">
+            <strong>Letras tentadas:</strong> <span id="guessed-letters">Nenhuma</span>
+        </div>
+
+        <div class="input-section" id="input-section">
+            <input
+                type="text"
+                id="letter-input"
+                maxlength="1"
+                placeholder="Digite uma letra"
+                autocomplete="off"
+            >
+            <button id="guess-button">Enviar</button>
+        </div>
+
+        <div class="controls">
+            <button id="new-game-button" class="primary">Novo Jogo</button>
+        </div>
+
+        <div class="reload-notification" id="reload-notification">
+            Engine atualizado! A página será recarregada...
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
