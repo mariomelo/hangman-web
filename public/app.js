@@ -112,7 +112,7 @@ function updateUI() {
 
     // Update guessed letters
     if (currentGameState.guesses.length === 0) {
-        guessedLettersDisplay.textContent = t('none');
+        guessedLettersDisplay.textContent = 'None';
     } else {
         guessedLettersDisplay.textContent = currentGameState.guesses.join(', ');
     }
