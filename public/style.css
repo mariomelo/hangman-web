@@ -38,9 +38,6 @@ h1 {
 }
 
 .game-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     margin-bottom: 30px;
     padding: 15px;
     background: #f8f9fa;
@@ -56,7 +53,11 @@ h1 {
 .message {
     color: #333;
     font-size: 1rem;
-    text-align: right;
+    text-align: center;
+    margin: 20px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
 }
 
 .word-display {
