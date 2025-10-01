@@ -4,10 +4,10 @@ After=network.target
 
 [Service]
 Type=simple
-User=www-data
-WorkingDirectory=/path/to/hangman-web
+User=melomario
+WorkingDirectory=/Users/melomario/projects/hangman-web
 Environment="NODE_ENV=production"
-Environment="PORT=3000"
+Environment="PORT=5173"
 ExecStart=/usr/bin/node server.js
 Restart=always
 RestartSec=10
