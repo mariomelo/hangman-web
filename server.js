@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const chokidar = require('chokidar');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -10,6 +11,33 @@ let clients = [];
 
 // Hot-reload game engine
 let gameEngine;
+
+// Load configuration
+let config;
+const configPath = path.join(__dirname, 'config.json');
+
+function loadConfig() {
+  try {
+    const configData = fs.readFileSync(configPath, 'utf8');
+    config = JSON.parse(configData);
+    console.log('Configuration loaded:', config);
+  } catch (error) {
+    console.error('Error loading config:', error);
+    config = { featureFlags: { virtualKeyboard: false } };
+  }
+}
+
+function saveConfig() {
+  try {
+    fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+    console.log('Configuration saved:', config);
+  } catch (error) {
+    console.error('Error saving config:', error);
+  }
+}
+
+// Initial config load
+loadConfig();
 
 function loadGameEngine() {
   // Clear the require cache to reload the module
@@ -85,8 +113,40 @@ app.get('/api/events', (req, res) => {
   });
 });
 
+// Feature flags endpoints
+app.get('/api/config', (req, res) => {
+  res.json(config);
+});
+
+app.get('/api/features', (req, res) => {
+  res.json(config.featureFlags);
+});
+
+app.post('/api/features', (req, res) => {
+  try {
+    const { featureFlags } = req.body;
+    config.featureFlags = { ...config.featureFlags, ...featureFlags };
+    saveConfig();
+
+    // Notify all connected clients about config change
+    clients.forEach(client => {
+      client.write(`data: ${JSON.stringify({ type: 'config-update', config })}\n\n`);
+    });
+
+    res.json({ success: true, featureFlags: config.featureFlags });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Admin page
+app.get('/adm', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
 app.listen(PORT, () => {
   console.log(`Hangman server running on http://localhost:${PORT}`);
+  console.log(`Admin panel available at http://localhost:${PORT}/adm`);
   console.log(`Game engine version: ${gameEngine.version()}`);
   console.log('Watching lib/engine for changes...');
 });

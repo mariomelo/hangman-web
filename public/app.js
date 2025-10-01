@@ -1,5 +1,6 @@
 // Game state
 let currentGameState = null;
+let featureFlags = {};
 
 // DOM elements
 const wordDisplay = document.getElementById('word-display');
@@ -10,10 +11,11 @@ const letterInput = document.getElementById('letter-input');
 const guessButton = document.getElementById('guess-button');
 const newGameButton = document.getElementById('new-game-button');
 const inputSection = document.getElementById('input-section');
+const virtualKeyboard = document.getElementById('virtual-keyboard');
 const versionDisplay = document.getElementById('version');
 const reloadNotification = document.getElementById('reload-notification');
 
-// Initialize SSE for hot-reload
+// Initialize SSE for hot-reload and config updates
 const eventSource = new EventSource('/api/events');
 
 eventSource.onmessage = (event) => {
@@ -23,8 +25,22 @@ eventSource.onmessage = (event) => {
         setTimeout(() => {
             window.location.reload();
         }, 1500);
+    } else if (data.type === 'config-update') {
+        featureFlags = data.config.featureFlags;
+        updateInputMode();
     }
 };
+
+// Load feature flags
+async function loadFeatureFlags() {
+    try {
+        const response = await fetch('/api/features');
+        featureFlags = await response.json();
+        updateInputMode();
+    } catch (error) {
+        console.error('Error loading feature flags:', error);
+    }
+}
 
 // Fetch and display engine version
 async function loadVersion() {
@@ -35,6 +51,43 @@ async function loadVersion() {
     } catch (error) {
         console.error('Error loading version:', error);
         versionDisplay.textContent = 'Error';
+    }
+}
+
+// Create virtual keyboard
+function createVirtualKeyboard() {
+    virtualKeyboard.innerHTML = '';
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+    letters.forEach(letter => {
+        const button = document.createElement('button');
+        button.textContent = letter;
+        button.dataset.letter = letter;
+        button.disabled = true;
+        button.addEventListener('click', () => handleVirtualKeyPress(letter));
+        virtualKeyboard.appendChild(button);
+    });
+}
+
+// Handle virtual keyboard press
+function handleVirtualKeyPress(letter) {
+    if (!currentGameState || currentGameState.status !== 'RUNNING') return;
+
+    // Make the guess (button state will be updated by updateUI)
+    makeGuessWithLetter(letter);
+}
+
+// Update input mode based on feature flags
+function updateInputMode() {
+    if (featureFlags.virtualKeyboard) {
+        inputSection.style.display = 'none';
+        virtualKeyboard.style.display = 'grid';
+        if (virtualKeyboard.children.length === 0) {
+            createVirtualKeyboard();
+        }
+    } else {
+        inputSection.style.display = 'flex';
+        virtualKeyboard.style.display = 'none';
     }
 }
 
@@ -51,14 +104,17 @@ async function startNewGame() {
         currentGameState = await response.json();
         updateUI();
         enableInput();
-        letterInput.focus();
+
+        if (!featureFlags.virtualKeyboard) {
+            letterInput.focus();
+        }
     } catch (error) {
         console.error('Error starting game:', error);
-        messageDisplay.textContent = 'Erro ao iniciar o jogo';
+        messageDisplay.textContent = 'Error starting game';
     }
 }
 
-// Make a guess
+// Make a guess (for text input)
 async function makeGuess() {
     const letter = letterInput.value.trim().toUpperCase();
 
@@ -66,6 +122,13 @@ async function makeGuess() {
         return;
     }
 
+    await makeGuessWithLetter(letter);
+    letterInput.value = '';
+    letterInput.focus();
+}
+
+// Make a guess with a specific letter
+async function makeGuessWithLetter(letter) {
     try {
         const response = await fetch('/api/guess', {
             method: 'POST',
@@ -85,12 +148,9 @@ async function makeGuess() {
         if (currentGameState.status !== 'RUNNING') {
             disableInput();
         }
-
-        letterInput.value = '';
-        letterInput.focus();
     } catch (error) {
         console.error('Error making guess:', error);
-        messageDisplay.textContent = 'Erro ao processar palpite';
+        messageDisplay.textContent = 'Error processing guess';
     }
 }
 
@@ -116,20 +176,62 @@ function updateUI() {
     } else {
         guessedLettersDisplay.textContent = currentGameState.guesses.join(', ');
     }
+
+    // Update virtual keyboard button states based on guessed letters
+    if (featureFlags.virtualKeyboard) {
+        updateVirtualKeyboardState();
+    }
+}
+
+// Update virtual keyboard button states
+function updateVirtualKeyboardState() {
+    if (!currentGameState) return;
+
+    virtualKeyboard.querySelectorAll('button').forEach(btn => {
+        const letter = btn.dataset.letter;
+        // Disable button if letter has been guessed
+        if (currentGameState.guesses.includes(letter)) {
+            btn.disabled = true;
+        } else {
+            btn.disabled = false;
+        }
+    });
+
+    // If game is over, disable all buttons
+    if (currentGameState.status !== 'RUNNING') {
+        virtualKeyboard.querySelectorAll('button').forEach(btn => {
+            btn.disabled = true;
+        });
+    }
 }
 
 // Enable input controls
 function enableInput() {
-    letterInput.disabled = false;
-    guessButton.disabled = false;
-    inputSection.classList.remove('disabled');
+    if (featureFlags.virtualKeyboard) {
+        // Enable all virtual keyboard buttons
+        virtualKeyboard.querySelectorAll('button').forEach(btn => {
+            btn.disabled = false;
+        });
+        virtualKeyboard.classList.remove('disabled');
+    } else {
+        letterInput.disabled = false;
+        guessButton.disabled = false;
+        inputSection.classList.remove('disabled');
+    }
 }
 
 // Disable input controls
 function disableInput() {
-    letterInput.disabled = true;
-    guessButton.disabled = true;
-    inputSection.classList.add('disabled');
+    if (featureFlags.virtualKeyboard) {
+        virtualKeyboard.querySelectorAll('button').forEach(btn => {
+            btn.disabled = true;
+        });
+        virtualKeyboard.classList.add('disabled');
+    } else {
+        letterInput.disabled = true;
+        guessButton.disabled = true;
+        inputSection.classList.add('disabled');
+    }
 }
 
 // Event listeners
@@ -144,5 +246,6 @@ letterInput.addEventListener('keypress', (e) => {
 newGameButton.addEventListener('click', startNewGame);
 
 // Initialize
+loadFeatureFlags();
 loadVersion();
 disableInput();

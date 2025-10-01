@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Hangman Game</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .admin-header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .admin-header h1 {
+            margin: 0;
+            color: #333;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .feature-flag {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            margin-bottom: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            transition: background 0.3s;
+        }
+
+        .feature-flag:hover {
+            background: #e9ecef;
+        }
+
+        .feature-info h3 {
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+
+        .feature-info p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #667eea;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .status-message {
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .status-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh;">
+    <div class="admin-container">
+        <a href="/" class="back-link">← Back to Game</a>
+
+        <div class="admin-header">
+            <h1>Admin Panel</h1>
+            <p>Manage feature flags for the Hangman game</p>
+        </div>
+
+        <div id="feature-flags">
+            <div class="feature-flag">
+                <div class="feature-info">
+                    <h3>Virtual Keyboard</h3>
+                    <p>Replace text input with 26 letter buttons (A-Z)</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="virtualKeyboard">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div id="status" class="status-message"></div>
+    </div>
+
+    <script>
+        const virtualKeyboardToggle = document.getElementById('virtualKeyboard');
+        const statusMessage = document.getElementById('status');
+
+        // Load current feature flags
+        async function loadFeatureFlags() {
+            try {
+                const response = await fetch('/api/features');
+                const features = await response.json();
+                virtualKeyboardToggle.checked = features.virtualKeyboard || false;
+            } catch (error) {
+                console.error('Error loading feature flags:', error);
+                showStatus('Error loading feature flags', 'error');
+            }
+        }
+
+        // Update feature flag
+        async function updateFeatureFlag(flagName, value) {
+            try {
+                const response = await fetch('/api/features', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        featureFlags: {
+                            [flagName]: value
+                        }
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showStatus(`Feature flag "${flagName}" updated successfully!`, 'success');
+                } else {
+                    showStatus('Error updating feature flag', 'error');
+                }
+            } catch (error) {
+                console.error('Error updating feature flag:', error);
+                showStatus('Error updating feature flag', 'error');
+            }
+        }
+
+        // Show status message
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message ${type} show`;
+            setTimeout(() => {
+                statusMessage.classList.remove('show');
+            }, 3000);
+        }
+
+        // Event listeners
+        virtualKeyboardToggle.addEventListener('change', (e) => {
+            updateFeatureFlag('virtualKeyboard', e.target.checked);
+        });
+
+        // Initialize
+        loadFeatureFlags();
+    </script>
+</body>
+</html>
