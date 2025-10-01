@@ -1,5 +1,6 @@
 {
   "featureFlags": {
-    "virtualKeyboard": true
+    "virtualKeyboard": false,
+    "timer": false
   }
 }

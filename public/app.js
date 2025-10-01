@@ -1,6 +1,7 @@
 // Game state
 let currentGameState = null;
 let featureFlags = {};
+let timerInterval = null;
 
 // DOM elements
 const wordDisplay = document.getElementById('word-display');
@@ -12,6 +13,8 @@ const guessButton = document.getElementById('guess-button');
 const newGameButton = document.getElementById('new-game-button');
 const inputSection = document.getElementById('input-section');
 const virtualKeyboard = document.getElementById('virtual-keyboard');
+const timerDisplay = document.getElementById('timer-display');
+const timerValue = document.getElementById('timer-value');
 const versionDisplay = document.getElementById('version');
 const reloadNotification = document.getElementById('reload-notification');
 
@@ -28,6 +31,8 @@ eventSource.onmessage = (event) => {
     } else if (data.type === 'config-update') {
         featureFlags = data.config.featureFlags;
         updateInputMode();
+        updateTimerDisplay();
+        updateTimer();
     }
 };
 
@@ -37,9 +42,97 @@ async function loadFeatureFlags() {
         const response = await fetch('/api/features');
         featureFlags = await response.json();
         updateInputMode();
+        updateTimerDisplay();
+        updateTimer();
     } catch (error) {
         console.error('Error loading feature flags:', error);
     }
+}
+
+// Timer functionality
+function startTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+    }
+
+    if (featureFlags.timer && currentGameState && currentGameState.status === 'RUNNING') {
+        timerInterval = setInterval(async () => {
+            if (!currentGameState || currentGameState.status !== 'RUNNING') {
+                stopTimer();
+                return;
+            }
+
+            // Send tick event to game engine
+            try {
+                const newGameState = await handleGameEvent('tick');
+                if (newGameState) {
+                    currentGameState = newGameState;
+                    updateUI();
+
+                    // Stop timer if game ended
+                    if (currentGameState.status !== 'RUNNING') {
+                        stopTimer();
+                        disableInput();
+                    }
+                }
+            } catch (error) {
+                console.error('Error processing tick event:', error);
+            }
+        }, 1000);
+    }
+}
+
+function stopTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+}
+
+function updateTimer() {
+    if (featureFlags.timer && currentGameState && currentGameState.status === 'RUNNING') {
+        startTimer();
+    } else {
+        stopTimer();
+    }
+}
+
+// Update timer display visibility and value
+function updateTimerDisplay() {
+    if (featureFlags.timer) {
+        timerDisplay.style.display = 'block';
+        if (currentGameState && currentGameState.timer !== undefined) {
+            timerValue.textContent = currentGameState.timer;
+        } else {
+            timerValue.textContent = '0';
+        }
+    } else {
+        timerDisplay.style.display = 'none';
+    }
+}
+
+// Handle game event (for timer)
+async function handleGameEvent(event, data) {
+    try {
+        const response = await fetch('/api/event', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                gameState: currentGameState,
+                event: event,
+                data: data
+            })
+        });
+
+        if (response.ok) {
+            return await response.json();
+        }
+    } catch (error) {
+        console.error('Error handling event:', error);
+    }
+    return null;
 }
 
 // Fetch and display engine version
@@ -108,6 +201,11 @@ async function startNewGame() {
         if (!featureFlags.virtualKeyboard) {
             letterInput.focus();
         }
+
+        // Start timer if feature is enabled
+        if (featureFlags.timer) {
+            startTimer();
+        }
     } catch (error) {
         console.error('Error starting game:', error);
         messageDisplay.textContent = 'Error starting game';
@@ -175,6 +273,11 @@ function updateUI() {
         guessedLettersDisplay.textContent = 'None';
     } else {
         guessedLettersDisplay.textContent = currentGameState.guesses.join(', ');
+    }
+
+    // Update timer display
+    if (featureFlags.timer) {
+        updateTimerDisplay();
     }
 
     // Update virtual keyboard button states based on guessed letters

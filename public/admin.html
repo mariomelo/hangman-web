@@ -153,6 +153,17 @@
                     <span class="slider"></span>
                 </label>
             </div>
+
+            <div class="feature-flag">
+                <div class="feature-info">
+                    <h3>Timer</h3>
+                    <p>Send "tick" event to game engine every second while game is running</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="timer">
+                    <span class="slider"></span>
+                </label>
+            </div>
         </div>
 
         <div id="status" class="status-message"></div>
@@ -160,6 +171,7 @@
 
     <script>
         const virtualKeyboardToggle = document.getElementById('virtualKeyboard');
+        const timerToggle = document.getElementById('timer');
         const statusMessage = document.getElementById('status');
 
         // Load current feature flags
@@ -168,6 +180,7 @@
                 const response = await fetch('/api/features');
                 const features = await response.json();
                 virtualKeyboardToggle.checked = features.virtualKeyboard || false;
+                timerToggle.checked = features.timer || false;
             } catch (error) {
                 console.error('Error loading feature flags:', error);
                 showStatus('Error loading feature flags', 'error');
@@ -213,6 +226,10 @@
         // Event listeners
         virtualKeyboardToggle.addEventListener('change', (e) => {
             updateFeatureFlag('virtualKeyboard', e.target.checked);
+        });
+
+        timerToggle.addEventListener('change', (e) => {
+            updateFeatureFlag('timer', e.target.checked);
         });
 
         // Initialize

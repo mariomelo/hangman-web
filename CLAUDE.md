@@ -43,7 +43,20 @@ Game state is maintained in the browser only - no server-side persistence requir
 
 ### Feature Flags
 
-Future feature flags will be configuration file-based. Server restart for configuration changes is acceptable.
+Feature flags are managed via `config.json` and can be toggled in real-time through the admin panel at `/adm`. No server restart is required - changes are pushed to all connected clients via SSE.
+
+**Available Feature Flags:**
+
+1. **virtualKeyboard** (default: false)
+   - Replaces text input with 26 letter buttons (A-Z)
+   - Buttons are automatically disabled based on `gameState.guesses` array
+   - Students implement the guessing logic that populates this array
+
+2. **timer** (default: false)
+   - Sends a "tick" event to the game engine every second
+   - Only active while `gameState.status` is "RUNNING"
+   - Stops when game ends (WON or LOST)
+   - Students can use this to implement time-based features
 
 ## Technology Stack
 
@@ -100,7 +113,21 @@ sudo systemctl status hangman-web
 - **Hot-reload**: File watcher monitors `/lib/engine/**/*.js` and notifies connected clients via SSE
 
 ### API Endpoints
+
+**Game Endpoints:**
 - `POST /api/start` - Start new game
 - `POST /api/guess` - Submit a letter guess (body: `{gameState, letter}`)
 - `GET /api/version` - Get current engine version
-- `GET /api/events` - SSE endpoint for hot-reload notifications
+- `GET /api/events` - SSE endpoint for hot-reload and config update notifications
+
+**Admin Endpoints:**
+- `GET /adm` - Admin panel UI
+- `GET /api/config` - Get full configuration
+- `GET /api/features` - Get feature flags
+- `POST /api/features` - Update feature flags (body: `{featureFlags: {...}}`)
+
+**Feature Flag Management:**
+1. Access admin panel: `http://localhost:5173/adm`
+2. Toggle feature flags on/off
+3. Changes are saved to `config.json` and pushed to all clients in real-time
+4. No server restart required

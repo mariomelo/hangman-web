@@ -98,6 +98,16 @@ app.get('/api/version', (req, res) => {
   }
 });
 
+app.post('/api/event', (req, res) => {
+  try {
+    const { gameState, event, data } = req.body;
+    const newGameState = gameEngine.handleEvent(event, data, gameState);
+    res.json(newGameState);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Server-Sent Events endpoint for hot-reload notifications
 app.get('/api/events', (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
