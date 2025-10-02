@@ -164,6 +164,17 @@
                     <span class="slider"></span>
                 </label>
             </div>
+
+            <div class="feature-flag">
+                <div class="feature-info">
+                    <h3>Difficulty Levels</h3>
+                    <p>Replace "New Game" button with Easy, Medium, and Hard difficulty options</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="difficulty">
+                    <span class="slider"></span>
+                </label>
+            </div>
         </div>
 
         <div id="status" class="status-message"></div>
@@ -172,6 +183,7 @@
     <script>
         const virtualKeyboardToggle = document.getElementById('virtualKeyboard');
         const timerToggle = document.getElementById('timer');
+        const difficultyToggle = document.getElementById('difficulty');
         const statusMessage = document.getElementById('status');
 
         // Load current feature flags
@@ -181,6 +193,7 @@
                 const features = await response.json();
                 virtualKeyboardToggle.checked = features.virtualKeyboard || false;
                 timerToggle.checked = features.timer || false;
+                difficultyToggle.checked = features.difficulty || false;
             } catch (error) {
                 console.error('Error loading feature flags:', error);
                 showStatus('Error loading feature flags', 'error');
@@ -230,6 +243,10 @@
 
         timerToggle.addEventListener('change', (e) => {
             updateFeatureFlag('timer', e.target.checked);
+        });
+
+        difficultyToggle.addEventListener('change', (e) => {
+            updateFeatureFlag('difficulty', e.target.checked);
         });
 
         // Initialize

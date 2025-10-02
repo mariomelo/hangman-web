@@ -15,6 +15,8 @@ The `/lib/engine` directory contains a **placeholder** game engine that students
 - Return a basic GameState structure
 - Not implement actual game logic (students will add this)
 
+**Important**: Students work **only** within `/lib/engine`. They can add new files (e.g., word dictionaries, helpers) and these files are loaded dynamically via hot-reload. The UI code should never be modified by students.
+
 **GameState Structure:**
 ```javascript
 {
@@ -57,6 +59,14 @@ Feature flags are managed via `config.json` and can be toggled in real-time thro
    - Only active while `gameState.status` is "RUNNING"
    - Stops when game ends (WON or LOST)
    - Students can use this to implement time-based features
+   - Timer value is displayed when flag is enabled (reads from `gameState.timer`)
+
+3. **difficulty** (default: false)
+   - Replaces "New Game" button with three difficulty buttons: Easy, Medium, Hard
+   - When enabled, difficulty string ("easy", "medium", "hard") is passed to `gameEngine.startGame(difficulty)`
+   - Students modify `startGame()` to accept this parameter and implement difficulty-based logic
+   - Examples: different word lists, starting lives, time limits, hint availability
+   - Students should handle the parameter gracefully (e.g., default value when not provided)
 
 ## Technology Stack
 

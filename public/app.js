@@ -13,6 +13,7 @@ const guessButton = document.getElementById('guess-button');
 const newGameButton = document.getElementById('new-game-button');
 const inputSection = document.getElementById('input-section');
 const virtualKeyboard = document.getElementById('virtual-keyboard');
+const difficultyControls = document.getElementById('difficulty-controls');
 const timerDisplay = document.getElementById('timer-display');
 const timerValue = document.getElementById('timer-value');
 const versionDisplay = document.getElementById('version');
@@ -33,6 +34,7 @@ eventSource.onmessage = (event) => {
         updateInputMode();
         updateTimerDisplay();
         updateTimer();
+        updateDifficultyControls();
     }
 };
 
@@ -44,6 +46,7 @@ async function loadFeatureFlags() {
         updateInputMode();
         updateTimerDisplay();
         updateTimer();
+        updateDifficultyControls();
     } catch (error) {
         console.error('Error loading feature flags:', error);
     }
@@ -184,14 +187,28 @@ function updateInputMode() {
     }
 }
 
+// Update difficulty controls visibility
+function updateDifficultyControls() {
+    const normalControls = document.querySelector('.controls');
+
+    if (featureFlags.difficulty) {
+        normalControls.style.display = 'none';
+        difficultyControls.style.display = 'flex';
+    } else {
+        normalControls.style.display = 'block';
+        difficultyControls.style.display = 'none';
+    }
+}
+
 // Start a new game
-async function startNewGame() {
+async function startNewGame(difficulty) {
     try {
         const response = await fetch('/api/start', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
-            }
+            },
+            body: JSON.stringify({ difficulty })
         });
 
         currentGameState = await response.json();
@@ -346,7 +363,15 @@ letterInput.addEventListener('keypress', (e) => {
     }
 });
 
-newGameButton.addEventListener('click', startNewGame);
+newGameButton.addEventListener('click', () => startNewGame());
+
+// Difficulty button event listeners
+difficultyControls.addEventListener('click', (e) => {
+    if (e.target.classList.contains('difficulty-button')) {
+        const difficulty = e.target.dataset.difficulty;
+        startNewGame(difficulty);
+    }
+});
 
 // Initialize
 loadFeatureFlags();

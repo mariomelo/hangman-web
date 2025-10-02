@@ -73,7 +73,10 @@ app.use(express.static('public'));
 // API endpoints
 app.post('/api/start', (req, res) => {
   try {
-    const gameState = gameEngine.startGame();
+    const { difficulty } = req.body;
+    // Pass difficulty if provided (when difficulty flag is enabled)
+    // Students will modify startGame() in /lib/engine to accept and use this parameter
+    const gameState = difficulty ? gameEngine.startGame(difficulty) : gameEngine.startGame();
     res.json(gameState);
   } catch (error) {
     res.status(500).json({ error: error.message });

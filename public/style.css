@@ -183,6 +183,59 @@ button:disabled {
     background: #218838;
 }
 
+/* Difficulty Controls */
+.difficulty-controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.difficulty-button {
+    padding: 15px 30px;
+    font-size: 1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    color: white;
+    transition: transform 0.2s, box-shadow 0.3s;
+}
+
+.difficulty-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.difficulty-button:active {
+    transform: translateY(0);
+}
+
+.difficulty-button.easy {
+    background: #28a745;
+}
+
+.difficulty-button.easy:hover {
+    background: #218838;
+}
+
+.difficulty-button.medium {
+    background: #ffc107;
+    color: #333;
+}
+
+.difficulty-button.medium:hover {
+    background: #e0a800;
+}
+
+.difficulty-button.hard {
+    background: #dc3545;
+}
+
+.difficulty-button.hard:hover {
+    background: #c82333;
+}
+
 .reload-notification {
     display: none;
     position: fixed;
