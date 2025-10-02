@@ -186,6 +186,17 @@
                     <span class="slider"></span>
                 </label>
             </div>
+
+            <div class="feature-flag">
+                <div class="feature-info">
+                    <h3>Money Bag</h3>
+                    <p>Show animated money bag on screen. Click sends "money_bag" event to game engine</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="moneyBag">
+                    <span class="slider"></span>
+                </label>
+            </div>
         </div>
 
         <div id="status" class="status-message"></div>
@@ -196,6 +207,7 @@
         const timerToggle = document.getElementById('timer');
         const difficultyToggle = document.getElementById('difficulty');
         const leaderboardToggle = document.getElementById('leaderboard');
+        const moneyBagToggle = document.getElementById('moneyBag');
         const statusMessage = document.getElementById('status');
 
         // Load current feature flags
@@ -207,6 +219,7 @@
                 timerToggle.checked = features.timer || false;
                 difficultyToggle.checked = features.difficulty || false;
                 leaderboardToggle.checked = features.leaderboard || false;
+                moneyBagToggle.checked = features.moneyBag || false;
             } catch (error) {
                 console.error('Error loading feature flags:', error);
                 showStatus('Error loading feature flags', 'error');
@@ -264,6 +277,10 @@
 
         leaderboardToggle.addEventListener('change', (e) => {
             updateFeatureFlag('leaderboard', e.target.checked);
+        });
+
+        moneyBagToggle.addEventListener('change', (e) => {
+            updateFeatureFlag('moneyBag', e.target.checked);
         });
 
         // Initialize

@@ -22,6 +22,7 @@ const timerDisplay = document.getElementById('timer-display');
 const timerValue = document.getElementById('timer-value');
 const versionDisplay = document.getElementById('version');
 const reloadNotification = document.getElementById('reload-notification');
+const moneyBag = document.getElementById('money-bag');
 
 // Initialize SSE for hot-reload and config updates
 const eventSource = new EventSource('/api/events');
@@ -40,6 +41,7 @@ eventSource.onmessage = (event) => {
         updateTimer();
         updateDifficultyControls();
         updateLeaderboardDisplay();
+        updateMoneyBagDisplay();
     }
 };
 
@@ -53,6 +55,7 @@ async function loadFeatureFlags() {
         updateTimer();
         updateDifficultyControls();
         updateLeaderboardDisplay();
+        updateMoneyBagDisplay();
     } catch (error) {
         console.error('Error loading feature flags:', error);
     }
@@ -261,6 +264,56 @@ function updateDifficultyControls() {
     }
 }
 
+// Money Bag functionality
+function updateMoneyBagDisplay() {
+    if (featureFlags.moneyBag && currentGameState && currentGameState.status === 'RUNNING' && currentGameState.money_bag) {
+        moneyBag.style.display = 'block';
+        randomizeMoneyBagPosition();
+    } else {
+        moneyBag.style.display = 'none';
+    }
+}
+
+function randomizeMoneyBagPosition() {
+    const maxX = window.innerWidth - 100;
+    const maxY = window.innerHeight - 100;
+    const randomX = Math.random() * maxX;
+    const randomY = Math.random() * maxY;
+
+    moneyBag.style.left = randomX + 'px';
+    moneyBag.style.top = randomY + 'px';
+}
+
+// Money bag click handler
+moneyBag.addEventListener('click', async () => {
+    if (!currentGameState || currentGameState.status !== 'RUNNING') return;
+
+    try {
+        const newGameState = await handleGameEvent('money_bag');
+        if (newGameState) {
+            currentGameState = newGameState;
+            updateUI();
+
+            // Check if money bag should be removed
+            if (!currentGameState.money_bag) {
+                moneyBag.style.display = 'none';
+            } else {
+                // Move to new random position
+                randomizeMoneyBagPosition();
+            }
+
+            // Stop game if ended
+            if (currentGameState.status !== 'RUNNING') {
+                stopTimer();
+                disableInput();
+                handleGameEnd();
+            }
+        }
+    } catch (error) {
+        console.error('Error handling money bag click:', error);
+    }
+});
+
 // Start a new game
 async function startNewGame(difficulty) {
     try {
@@ -284,6 +337,9 @@ async function startNewGame(difficulty) {
         if (featureFlags.timer) {
             startTimer();
         }
+
+        // Show money bag if feature is enabled
+        updateMoneyBagDisplay();
     } catch (error) {
         console.error('Error starting game:', error);
         messageDisplay.textContent = 'Error starting game';

@@ -208,6 +208,25 @@
                             <h3>Note</h3>
                             <p>Higher scores are ranked better. The leaderboard displays the top 10 scores in descending order.</p>
                         `
+                    },
+                    moneyBag: {
+                        title: 'Money Bag',
+                        content: `
+                            <h3>Required GameState Field</h3>
+                            <p><span class="field-name">money_bag</span> (boolean)</p>
+                            <p>Controls whether the money bag is displayed. If <span class="field-name">true</span>, the money bag appears on screen.</p>
+
+                            <h3>Example</h3>
+                            <div class="code-block">money_bag: true</div>
+
+                            <h3>Event Handler</h3>
+                            <p>Your <span class="field-name">handleEvent()</span> method will receive a <span class="field-name">"money_bag"</span> event when the player clicks the money bag.</p>
+
+                            <h3>Example Event Call</h3>
+                            <div class="code-block">handleEvent("money_bag", undefined, currentGameState)</div>
+
+                            <p>If you set <span class="field-name">money_bag</span> to <span class="field-name">false</span> in the returned game state, the money bag will be removed from the screen.</p>
+                        `
                     }
                 };
 

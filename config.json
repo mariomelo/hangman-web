@@ -3,6 +3,7 @@
     "virtualKeyboard": false,
     "timer": false,
     "difficulty": false,
-    "leaderboard": false
+    "leaderboard": false,
+    "moneyBag": true
   }
 }
