@@ -68,6 +68,15 @@ Feature flags are managed via `config.json` and can be toggled in real-time thro
    - Examples: different word lists, starting lives, time limits, hint availability
    - Students should handle the parameter gracefully (e.g., default value when not provided)
 
+4. **leaderboard** (default: false)
+   - Displays player name input field at top of game
+   - Shows leaderboard with top 10 scores (sorted descending)
+   - When game ends (WON or LOST), saves score to leaderboard if player name is provided
+   - Students must implement `score` field in `gameState`
+   - Score is saved automatically when game status changes from RUNNING
+   - Leaderboard persisted in `leaderboard.json` file
+   - Top 3 entries have special styling (gold, silver, bronze)
+
 ## Technology Stack
 
 Must use Node.js-based stack that:
@@ -132,9 +141,14 @@ sudo systemctl status hangman-web
 
 **Admin Endpoints:**
 - `GET /adm` - Admin panel UI
+- `GET /docs` - Documentation page (shows required fields for enabled features)
 - `GET /api/config` - Get full configuration
 - `GET /api/features` - Get feature flags
 - `POST /api/features` - Update feature flags (body: `{featureFlags: {...}}`)
+
+**Leaderboard Endpoints:**
+- `GET /api/leaderboard` - Get top 10 scores (sorted by score descending)
+- `POST /api/leaderboard` - Save a score (body: `{playerName, score}`)
 
 **Feature Flag Management:**
 1. Access admin panel: `http://localhost:5173/adm`

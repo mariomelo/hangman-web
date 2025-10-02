@@ -14,6 +14,10 @@ const newGameButton = document.getElementById('new-game-button');
 const inputSection = document.getElementById('input-section');
 const virtualKeyboard = document.getElementById('virtual-keyboard');
 const difficultyControls = document.getElementById('difficulty-controls');
+const playerNameSection = document.getElementById('player-name-section');
+const playerNameInput = document.getElementById('player-name-input');
+const leaderboardSection = document.getElementById('leaderboard-section');
+const leaderboardList = document.getElementById('leaderboard-list');
 const timerDisplay = document.getElementById('timer-display');
 const timerValue = document.getElementById('timer-value');
 const versionDisplay = document.getElementById('version');
@@ -35,6 +39,7 @@ eventSource.onmessage = (event) => {
         updateTimerDisplay();
         updateTimer();
         updateDifficultyControls();
+        updateLeaderboardDisplay();
     }
 };
 
@@ -47,8 +52,64 @@ async function loadFeatureFlags() {
         updateTimerDisplay();
         updateTimer();
         updateDifficultyControls();
+        updateLeaderboardDisplay();
     } catch (error) {
         console.error('Error loading feature flags:', error);
+    }
+}
+
+// Load and display leaderboard
+async function loadLeaderboard() {
+    try {
+        const response = await fetch('/api/leaderboard');
+        const leaderboard = await response.json();
+
+        if (leaderboard.length === 0) {
+            leaderboardList.innerHTML = '<p style="text-align: center; color: #666;">No scores yet. Be the first!</p>';
+            return;
+        }
+
+        leaderboardList.innerHTML = leaderboard.map((entry, index) => {
+            const topClass = index === 0 ? 'top-1' : index === 1 ? 'top-2' : index === 2 ? 'top-3' : '';
+            return `
+                <div class="leaderboard-entry ${topClass}">
+                    <span class="leaderboard-rank">#${index + 1}</span>
+                    <span class="leaderboard-name">${entry.playerName}</span>
+                    <span class="leaderboard-score">${entry.score}</span>
+                </div>
+            `;
+        }).join('');
+    } catch (error) {
+        console.error('Error loading leaderboard:', error);
+        leaderboardList.innerHTML = '<p style="text-align: center; color: #dc3545;">Error loading leaderboard</p>';
+    }
+}
+
+// Save score to leaderboard
+async function saveScore(playerName, score) {
+    try {
+        await fetch('/api/leaderboard', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ playerName, score })
+        });
+        await loadLeaderboard();
+    } catch (error) {
+        console.error('Error saving score:', error);
+    }
+}
+
+// Update leaderboard display based on feature flag
+function updateLeaderboardDisplay() {
+    if (featureFlags.leaderboard) {
+        playerNameSection.style.display = 'block';
+        leaderboardSection.style.display = 'block';
+        loadLeaderboard();
+    } else {
+        playerNameSection.style.display = 'none';
+        leaderboardSection.style.display = 'none';
     }
 }
 
@@ -262,10 +323,28 @@ async function makeGuessWithLetter(letter) {
         // Check if game is over
         if (currentGameState.status !== 'RUNNING') {
             disableInput();
+            handleGameEnd();
         }
     } catch (error) {
         console.error('Error making guess:', error);
         messageDisplay.textContent = 'Error processing guess';
+    }
+}
+
+// Handle game end (save score if leaderboard enabled)
+async function handleGameEnd() {
+    if (!featureFlags.leaderboard) return;
+
+    const playerName = playerNameInput.value.trim();
+    if (!playerName) {
+        messageDisplay.textContent += ' - Please enter your name to save your score!';
+        return;
+    }
+
+    // Students will implement score field in gameState
+    const score = currentGameState.score;
+    if (score !== undefined) {
+        await saveScore(playerName, score);
     }
 }
 

@@ -15,6 +15,7 @@ let gameEngine;
 // Load configuration
 let config;
 const configPath = path.join(__dirname, 'config.json');
+const leaderboardPath = path.join(__dirname, 'leaderboard.json');
 
 function loadConfig() {
   try {
@@ -33,6 +34,25 @@ function saveConfig() {
     console.log('Configuration saved:', config);
   } catch (error) {
     console.error('Error saving config:', error);
+  }
+}
+
+// Leaderboard functions
+function loadLeaderboard() {
+  try {
+    const data = fs.readFileSync(leaderboardPath, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('Error loading leaderboard:', error);
+    return [];
+  }
+}
+
+function saveLeaderboard(leaderboard) {
+  try {
+    fs.writeFileSync(leaderboardPath, JSON.stringify(leaderboard, null, 2));
+  } catch (error) {
+    console.error('Error saving leaderboard:', error);
   }
 }
 
@@ -152,14 +172,54 @@ app.post('/api/features', (req, res) => {
   }
 });
 
+// Leaderboard endpoints
+app.get('/api/leaderboard', (req, res) => {
+  try {
+    const leaderboard = loadLeaderboard();
+    // Sort by score descending and return top 10
+    const sorted = leaderboard.sort((a, b) => b.score - a.score).slice(0, 10);
+    res.json(sorted);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/leaderboard', (req, res) => {
+  try {
+    const { playerName, score } = req.body;
+
+    if (!playerName || score === undefined) {
+      return res.status(400).json({ error: 'playerName and score are required' });
+    }
+
+    const leaderboard = loadLeaderboard();
+    leaderboard.push({
+      playerName,
+      score,
+      timestamp: new Date().toISOString()
+    });
+
+    saveLeaderboard(leaderboard);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Admin page
 app.get('/adm', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
+// Documentation page
+app.get('/docs', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'docs.html'));
+});
+
 app.listen(PORT, () => {
   console.log(`Hangman server running on http://localhost:${PORT}`);
   console.log(`Admin panel available at http://localhost:${PORT}/adm`);
+  console.log(`Documentation available at http://localhost:${PORT}/docs`);
   console.log(`Game engine version: ${gameEngine.version()}`);
   console.log('Watching lib/engine for changes...');
 });

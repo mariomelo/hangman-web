@@ -175,6 +175,17 @@
                     <span class="slider"></span>
                 </label>
             </div>
+
+            <div class="feature-flag">
+                <div class="feature-info">
+                    <h3>Leaderboard</h3>
+                    <p>Ask for player name and save scores to leaderboard on game completion</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="leaderboard">
+                    <span class="slider"></span>
+                </label>
+            </div>
         </div>
 
         <div id="status" class="status-message"></div>
@@ -184,6 +195,7 @@
         const virtualKeyboardToggle = document.getElementById('virtualKeyboard');
         const timerToggle = document.getElementById('timer');
         const difficultyToggle = document.getElementById('difficulty');
+        const leaderboardToggle = document.getElementById('leaderboard');
         const statusMessage = document.getElementById('status');
 
         // Load current feature flags
@@ -194,6 +206,7 @@
                 virtualKeyboardToggle.checked = features.virtualKeyboard || false;
                 timerToggle.checked = features.timer || false;
                 difficultyToggle.checked = features.difficulty || false;
+                leaderboardToggle.checked = features.leaderboard || false;
             } catch (error) {
                 console.error('Error loading feature flags:', error);
                 showStatus('Error loading feature flags', 'error');
@@ -247,6 +260,10 @@
 
         difficultyToggle.addEventListener('change', (e) => {
             updateFeatureFlag('difficulty', e.target.checked);
+        });
+
+        leaderboardToggle.addEventListener('change', (e) => {
+            updateFeatureFlag('leaderboard', e.target.checked);
         });
 
         // Initialize

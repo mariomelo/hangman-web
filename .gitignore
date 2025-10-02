@@ -29,3 +29,6 @@ pids/
 *.pid
 *.seed
 *.pid.lock
+
+# Leaderboard data (optional - uncomment if you don't want to track)
+# leaderboard.json

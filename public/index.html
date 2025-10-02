@@ -10,6 +10,11 @@
     <div class="container">
         <h1>Hangman Game</h1>
 
+        <div class="player-name-section" id="player-name-section" style="display: none;">
+            <label for="player-name-input">Player Name:</label>
+            <input type="text" id="player-name-input" placeholder="Enter your name" maxlength="20">
+        </div>
+
         <div class="version">
             Engine Version: <span id="version">Loading...</span>
         </div>
@@ -55,6 +60,13 @@
             <button class="difficulty-button easy" data-difficulty="easy">Easy</button>
             <button class="difficulty-button medium" data-difficulty="medium">Medium</button>
             <button class="difficulty-button hard" data-difficulty="hard">Hard</button>
+        </div>
+
+        <div class="leaderboard-section" id="leaderboard-section" style="display: none;">
+            <h2>Leaderboard</h2>
+            <div class="leaderboard-list" id="leaderboard-list">
+                <p>Loading...</p>
+            </div>
         </div>
 
         <div class="reload-notification" id="reload-notification">

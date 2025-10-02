@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Engine Documentation</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .docs-container {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .docs-header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .docs-header h1 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .feature-doc {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .feature-doc h2 {
+            margin: 0 0 15px 0;
+            color: #667eea;
+        }
+
+        .feature-doc h3 {
+            margin: 15px 0 10px 0;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .feature-doc p {
+            margin: 10px 0;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        .field-name {
+            color: #667eea;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        .no-features {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .no-features p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .admin-link {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .admin-link:hover {
+            background: #5568d3;
+        }
+    </style>
+</head>
+<body style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh;">
+    <div class="docs-container">
+        <a href="/" class="back-link">← Back to Game</a>
+
+        <div class="docs-header">
+            <h1>Game Engine Documentation</h1>
+            <p>Required fields and values for enabled features</p>
+        </div>
+
+        <div id="docs-content">
+            <p style="text-align: center; color: #666;">Loading...</p>
+        </div>
+    </div>
+
+    <script>
+        const docsContent = document.getElementById('docs-content');
+
+        async function loadDocs() {
+            try {
+                const response = await fetch('/api/features');
+                const features = await response.json();
+
+                const enabledFeatures = Object.entries(features).filter(([key, value]) => value === true);
+
+                if (enabledFeatures.length === 0) {
+                    docsContent.innerHTML = `
+                        <div class="no-features">
+                            <p>No features are currently enabled.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const docs = {
+                    virtualKeyboard: {
+                        title: 'Virtual Keyboard',
+                        content: `
+                            <h3>Required GameState Field</h3>
+                            <p><span class="field-name">guesses</span> (array of strings)</p>
+                            <p>Must contain all letters that have been guessed by the player.</p>
+
+                            <h3>Example</h3>
+                            <div class="code-block">guesses: ["A", "E", "I", "O", "U"]</div>
+
+                            <p>Each letter in this array will have its corresponding virtual keyboard button disabled.</p>
+                        `
+                    },
+                    timer: {
+                        title: 'Timer',
+                        content: `
+                            <h3>Required GameState Field</h3>
+                            <p><span class="field-name">timer</span> (number)</p>
+                            <p>The current timer value to display to the player.</p>
+
+                            <h3>Example</h3>
+                            <div class="code-block">timer: 45</div>
+
+                            <h3>Event Handler</h3>
+                            <p>Your <span class="field-name">handleEvent()</span> method will receive a <span class="field-name">"tick"</span> event every second while the game status is <span class="field-name">"RUNNING"</span>.</p>
+
+                            <h3>Example Event Call</h3>
+                            <div class="code-block">handleEvent("tick", undefined, currentGameState)</div>
+                        `
+                    },
+                    difficulty: {
+                        title: 'Difficulty Levels',
+                        content: `
+                            <h3>Required Method Parameter</h3>
+                            <p>Your <span class="field-name">startGame()</span> method will receive a difficulty parameter.</p>
+
+                            <h3>Possible Values</h3>
+                            <div class="code-block">"easy"
+"medium"
+"hard"</div>
+
+                            <h3>Example Method Signature</h3>
+                            <div class="code-block">startGame(difficulty)</div>
+
+                            <h3>Optional GameState Field</h3>
+                            <p><span class="field-name">difficulty</span> (string)</p>
+                            <p>You may store the difficulty in the game state if needed.</p>
+                        `
+                    },
+                    leaderboard: {
+                        title: 'Leaderboard',
+                        content: `
+                            <h3>Required GameState Field</h3>
+                            <p><span class="field-name">score</span> (number)</p>
+                            <p>The player's score for the current game.</p>
+
+                            <h3>Example</h3>
+                            <div class="code-block">score: 100</div>
+
+                            <p>When the game ends (status changes from <span class="field-name">"RUNNING"</span> to <span class="field-name">"WON"</span> or <span class="field-name">"LOST"</span>), the score will be automatically saved to the leaderboard if the player has entered their name.</p>
+
+                            <h3>Note</h3>
+                            <p>Higher scores are ranked better. The leaderboard displays the top 10 scores in descending order.</p>
+                        `
+                    }
+                };
+
+                let html = '';
+                for (const [featureName, enabled] of enabledFeatures) {
+                    if (docs[featureName]) {
+                        html += `
+                            <div class="feature-doc">
+                                <h2>${docs[featureName].title}</h2>
+                                ${docs[featureName].content}
+                            </div>
+                        `;
+                    }
+                }
+
+                docsContent.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading docs:', error);
+                docsContent.innerHTML = `
+                    <div class="no-features">
+                        <p style="color: #dc3545;">Error loading documentation</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize SSE for config updates
+        const eventSource = new EventSource('/api/events');
+
+        eventSource.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.type === 'config-update') {
+                loadDocs();
+            }
+        };
+
+        loadDocs();
+    </script>
+</body>
+</html>
