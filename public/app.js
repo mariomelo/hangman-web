@@ -432,6 +432,9 @@ function updateUI() {
         updateTimerDisplay();
     }
 
+    // Update money bag display
+    updateMoneyBagDisplay();
+
     // Update virtual keyboard button states based on guessed letters
     if (featureFlags.virtualKeyboard) {
         updateVirtualKeyboardState();
