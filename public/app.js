@@ -2,6 +2,7 @@
 let currentGameState = null;
 let featureFlags = {};
 let timerInterval = null;
+let moneyBagPosition = null;
 
 // DOM elements
 const wordDisplay = document.getElementById('word-display');
@@ -268,9 +269,19 @@ function updateDifficultyControls() {
 function updateMoneyBagDisplay() {
     if (featureFlags.moneyBag && currentGameState && currentGameState.status === 'RUNNING' && currentGameState.money_bag) {
         moneyBag.style.display = 'block';
-        randomizeMoneyBagPosition();
+
+        // Only randomize position if it hasn't been set yet
+        if (!moneyBagPosition) {
+            randomizeMoneyBagPosition();
+        } else {
+            // Use the saved position
+            moneyBag.style.left = moneyBagPosition.x + 'px';
+            moneyBag.style.top = moneyBagPosition.y + 'px';
+        }
     } else {
         moneyBag.style.display = 'none';
+        // Reset position when money bag is hidden
+        moneyBagPosition = null;
     }
 }
 
@@ -279,6 +290,9 @@ function randomizeMoneyBagPosition() {
     const maxY = window.innerHeight - 100;
     const randomX = Math.random() * maxX;
     const randomY = Math.random() * maxY;
+
+    // Save the position
+    moneyBagPosition = { x: randomX, y: randomY };
 
     moneyBag.style.left = randomX + 'px';
     moneyBag.style.top = randomY + 'px';
@@ -297,9 +311,8 @@ moneyBag.addEventListener('click', async () => {
             // Check if money bag should be removed
             if (!currentGameState.money_bag) {
                 moneyBag.style.display = 'none';
-            } else {
-                // Move to new random position
-                randomizeMoneyBagPosition();
+                // Reset position so it will be randomized again if it reappears
+                moneyBagPosition = null;
             }
 
             // Stop game if ended
