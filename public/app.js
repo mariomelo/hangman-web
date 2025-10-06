@@ -348,7 +348,7 @@ async function startNewGame(difficulty) {
 
 // Make a guess (for text input)
 async function makeGuess() {
-    const letter = letterInput.value.trim().toUpperCase();
+    const letter = letterInput.value.trim();
 
     if (!letter || !currentGameState) {
         return;
