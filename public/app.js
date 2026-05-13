@@ -3,6 +3,7 @@ let currentGameState = null;
 let featureFlags = {};
 let timerInterval = null;
 let moneyBagPosition = null;
+let isProcessing = false;
 
 // DOM elements
 const wordDisplay = document.getElementById('word-display');
@@ -130,14 +131,15 @@ function startTimer() {
                 return;
             }
 
-            // Send tick event to game engine
+            if (isProcessing) return;
+
+            isProcessing = true;
             try {
                 const newGameState = await handleGameEvent('tick');
                 if (newGameState) {
                     currentGameState = newGameState;
                     updateUI();
 
-                    // Stop timer if game ended
                     if (currentGameState.status !== 'RUNNING') {
                         stopTimer();
                         disableInput();
@@ -145,6 +147,8 @@ function startTimer() {
                 }
             } catch (error) {
                 console.error('Error processing tick event:', error);
+            } finally {
+                isProcessing = false;
             }
         }, 1000);
     }
@@ -301,21 +305,20 @@ function randomizeMoneyBagPosition() {
 // Money bag click handler
 moneyBag.addEventListener('click', async () => {
     if (!currentGameState || currentGameState.status !== 'RUNNING') return;
+    if (isProcessing) return;
 
+    isProcessing = true;
     try {
         const newGameState = await handleGameEvent('money_bag');
         if (newGameState) {
             currentGameState = newGameState;
             updateUI();
 
-            // Check if money bag should be removed
             if (!currentGameState.money_bag) {
                 moneyBag.style.display = 'none';
-                // Reset position so it will be randomized again if it reappears
                 moneyBagPosition = null;
             }
 
-            // Stop game if ended
             if (currentGameState.status !== 'RUNNING') {
                 stopTimer();
                 disableInput();
@@ -324,6 +327,8 @@ moneyBag.addEventListener('click', async () => {
         }
     } catch (error) {
         console.error('Error handling money bag click:', error);
+    } finally {
+        isProcessing = false;
     }
 });
 
@@ -374,6 +379,9 @@ async function makeGuess() {
 
 // Make a guess with a specific letter
 async function makeGuessWithLetter(letter) {
+    if (isProcessing) return;
+
+    isProcessing = true;
     try {
         const response = await fetch('/api/guess', {
             method: 'POST',
@@ -389,7 +397,6 @@ async function makeGuessWithLetter(letter) {
         currentGameState = await response.json();
         updateUI();
 
-        // Check if game is over
         if (currentGameState.status !== 'RUNNING') {
             disableInput();
             handleGameEnd();
@@ -397,6 +404,8 @@ async function makeGuessWithLetter(letter) {
     } catch (error) {
         console.error('Error making guess:', error);
         messageDisplay.textContent = 'Error processing guess';
+    } finally {
+        isProcessing = false;
     }
 }
 
